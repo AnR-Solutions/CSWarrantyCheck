@@ -2,16 +2,33 @@
 DellWarrantyCheck.ps1
 
 #>
+[CmdletBinding()]
+Param(
+    [Parameter(Mandatory=$False,Position=1)]
+    [string]$serviceTag
+)
+
 $apiKey = 'eb71b74357579b94e257f8284b88db01'
 
-$systemBIOS = Get-WmiObject Win32_SystemEnclosure
-$system = Get-WmiObject Win32_ComputerSystem
-
-$serviceTag = $systemBIOS.SerialNumber
-$computerName = $systemBIOS.__SERVER
-
-$model = $system.Model
-$manufacturer = $system.Manufacturer
+if(!$serviceTag)
+{
+    $systemBIOS = Get-WmiObject Win32_SystemEnclosure
+	$system = Get-WmiObject Win32_ComputerSystem
+    
+    $serviceTag = $systemBIOS.SerialNumber
+    $computerName = $systemBIOS.__SERVER
+    
+    $model = $system.Model
+    $manufacturer = $system.Manufacturer
+}
+else
+{
+    $serviceTag = $serviceTag
+    $computerName = 'Unknown'
+    
+    $model = 'Unknown'
+    $manufacturer = 'Dell'
+}
 
 if (!($manufacturer -match 'Dell')) 
 {
