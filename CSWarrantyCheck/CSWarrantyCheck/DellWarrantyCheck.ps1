@@ -3,9 +3,8 @@ DellWarrantyCheck.ps1
 
 #>
 $apiKey = 'eb71b74357579b94e257f8284b88db01'
-$dellAPIUrl = "https://sandbox.api.dell.com/support/v2/assetinfo/warranty/tags?svctags=${serviceTag}&apikey=${apiKey}"
 
-$bios = Get-WmiObject Win32_SystemEnclosure
+$systemBIOS = Get-WmiObject Win32_SystemEnclosure
 $system = Get-WmiObject Win32_ComputerSystem
 
 $serviceTag = $systemBIOS.SerialNumber
@@ -20,11 +19,12 @@ if (!($manufacturer -match 'Dell'))
 } 
 else 
 {
-    $webResponse = Invoke-RestMethod -URI $url -Method GET
-    $warrantyList = $req.getassetwarrantyresponse.getassetwarrantyresult.response.dellasset.warranties.warranty
-	$dellAsset  = $req.getassetwarrantyresponse.getassetwarrantyresult.response.dellasset
+	$dellAPIUrl = "https://sandbox.api.dell.com/support/v2/assetinfo/warranty/tags?svctags=${serviceTag}&apikey=${apiKey}"
+    $webResponse = Invoke-RestMethod -URI $dellAPIUrl -Method GET
+    $warrantyList = $webResponse.getassetwarrantyresponse.getassetwarrantyresult.response.dellasset.warranties.warranty
+	$dellAsset  = $webResponse.getassetwarrantyresponse.getassetwarrantyresult.response.dellasset
 
-	foreach($warranty in $warranties)
+	foreach($warranty in $warrantyList)
 	{
 		$deviceAge = [datetime]::ParseExact($dellAsset.shipdate,"yyyy-MM-ddTHH:mm:ss",$null)
 		$deviceAge = "{0:N2}" -f (([datetime]::now - $deviceAge).days / 365)
